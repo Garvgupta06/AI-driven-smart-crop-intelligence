@@ -2,7 +2,7 @@
 
 # Updates
 
-## Project Objecctives
+## Project Objectives
 - Detect Soil Moisture
 - Monitor temperature and humidity
 - toggle automatic irrigation (on/off)
@@ -10,7 +10,7 @@
 - manula control + automation control
 
 ## Hardware Requirements
-### microcontroller:
+### Microcontroller:
 - ESP32
 
 ### Sensors:
