@@ -25,11 +25,12 @@
 ## Software Requirments:
 - core Framework
 - Flask
-
-## design link 
-- https://www.tinkercad.com/things/fhN11jeuz2I/editel?returnTo=%2Fdashboard&sharecode=qL12FBooymbpJ4HXtfxJrVG13U5Xz-ItZWC-hXHdLmU
-- FLask-CORS
+- - FLask-CORS
 - Flaks-RESTful
 - Flask-JWT-Extended
 - Werkzeug
 - MongoDB
+
+
+## design link 
+- https://www.tinkercad.com/things/fhN11jeuz2I/editel?returnTo=%2Fdashboard&sharecode=qL12FBooymbpJ4HXtfxJrVG13U5Xz-ItZWC-hXHdLmU
