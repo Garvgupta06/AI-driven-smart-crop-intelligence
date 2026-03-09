@@ -33,11 +33,11 @@ void loop() {
     connectWiFi();
   }
 
-  int rawValue = analogRead(SOIL_PIN); // 0-4095
+  int rawValue = analogRead(SOIL_PIN); 
   Serial.print("Soil raw: ");
   Serial.println(rawValue);
 
-  // Optional irrigation control using raw threshold.
+
   if (rawValue > DRY_THRESHOLD) {
     digitalWrite(PUMP_PIN, HIGH);
   } else {
