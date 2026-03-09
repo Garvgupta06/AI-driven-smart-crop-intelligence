@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Crop Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <section class="card">
+      <h1>AI Driven Smart Crop Intelligence</h1>
+      <p class="muted">Soil sensor data receive karo, graph dekho, aur plant life-cycle prediction pao.</p>
+    </section>
+
+    <section class="card">
+      <h2>Planting Date</h2>
+      <form id="plantForm" class="form-row">
+        <div>
+          <label for="planting_date">Planting Date</label>
+          <input type="date" id="planting_date" name="planting_date" required />
+        </div>
+        <div>
+          <button type="submit">Save Date</button>
+        </div>
+      </form>
+      <p class="note" id="plantMsg"></p>
+    </section>
+
+    <section class="card">
+      <h2>Live Status</h2>
+      <div class="metrics">
+        <div class="metric"><h3>Moisture</h3><p id="mVal">--</p></div>
+        <div class="metric"><h3>Temperature</h3><p id="tVal">--</p></div>
+        <div class="metric"><h3>Humidity</h3><p id="hVal">--</p></div>
+        <div class="metric"><h3>Current Stage</h3><p id="stageVal">--</p></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Soil Moisture Graph</h2>
+      <canvas id="soilChart" height="95"></canvas>
+    </section>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
