@@ -35,6 +35,7 @@ Binary classification model to predict whether irrigation is needed based on IoT
 | Engineered | temp_humidity, temp_moisture |
 
 **Encoding:**
+
 - Crop_Type: One-Hot Encoded (Wheat, Rice, Cotton, Maize, Sugarcane, Potato)
 - Season: Label Encoded (Kharif: 0, Rabi: 1, Zaid: 2)
 - Region: Label Encoded (Central: 0, East: 1, North: 2, South: 3, West: 4)
