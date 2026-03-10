@@ -16,6 +16,52 @@
 - Hardware + web dashboard integration is in progress
 - Next step: improve automation logic and deploy stable dashboard
 
+### ML Model v0.1
+
+Binary classification model to predict whether irrigation is needed based on IoT sensor data and manual inputs.
+
+**Dataset:** `irrigation_prediction.csv`
+
+**Target Variable:**
+- 0 = No Irrigation Needed (Low demand)
+- 1 = Irrigation Needed (Medium/High demand)
+
+**Features Used:**
+
+| Type | Features |
+|------|----------|
+| Sensor Inputs | Humidity, Soil_Moisture, Temperature_C |
+| Manual Inputs | Crop_Type, Season, Region |
+| Engineered | temp_humidity, temp_moisture |
+
+**Encoding:**
+- Crop_Type: One-Hot Encoded (Wheat, Rice, Cotton, Maize, Sugarcane, Potato)
+- Season: Label Encoded (Kharif: 0, Rabi: 1, Zaid: 2)
+- Region: Label Encoded (Central: 0, East: 1, North: 2, South: 3, West: 4)
+
+**Model Accuracies:**
+| Model | Accuracy |
+|-------|----------|
+| Random Forest Classifier | ~70% |
+| XGBoost Classifier | ~70% |
+
+**PKL Files Generated:**
+| File | Description |
+|------|-------------|
+| `irrigation_model.pkl` | Trained Random Forest model |
+| `irrigation_feature_names.pkl` | List of feature column names in training order |
+| `irrigation_crop_encoder.pkl` | OneHotEncoder for Crop_Type |
+| `irrigation_season_encoder.pkl` | LabelEncoder for Season |
+| `irrigation_region_encoder.pkl` | LabelEncoder for Region |
+
+**Prediction Function:**
+```python
+predict_irrigation(humidity, soil_moisture, temperature, crop_type, season, region)
+# Returns: (prediction, probability)
+# prediction: 0 or 1
+# probability: confidence score (0.0 - 1.0)
+```
+
 ## Project Objectives
 - Detect Soil Moisture
 - Monitor temperature and humidity
