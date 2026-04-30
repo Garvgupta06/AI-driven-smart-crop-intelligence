@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Smart Irrigation System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='script.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <nav class="navbar">
+            <a class="brand" href="{{ url_for('home') }}">Smart Irrigation</a>
+            <div class="nav-links">
+                <a href="{{ url_for('home') }}">Home</a>
+                <a href="{{ url_for('about') }}">About Us</a>
+                <a href="{{ url_for('login') }}">Login</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="page-hero">
+            <div class="section-content">
+                <p class="eyebrow">About Project</p>
+                <h1>About Us</h1>
+                <p>
+                    Our irrigation system is designed to support better water management for plants.
+                    It reads sensor data from the field and displays it in a simple dashboard so the
+                    user can understand plant conditions quickly.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="info-grid">
+                <article class="info-card">
+                    <h2>Live Monitoring</h2>
+                    <p>Soil moisture, temperature, and humidity data is fetched from Blynk.</p>
+                </article>
+
+                <article class="info-card">
+                    <h2>Secure Dashboard</h2>
+                    <p>Only logged-in users can open the dashboard and view live sensor values.</p>
+                </article>
+
+                <article class="info-card">
+                    <h2>Water Saving</h2>
+                    <p>The system helps users make better irrigation decisions for plants.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="section team-section">
+            <div class="section-content centered-content">
+                <p class="eyebrow">Project Team</p>
+                <h2>Team Members</h2>
+                <p>These team members contributed to the Smart Irrigation System project.</p>
+            </div>
+
+            <div class="team-grid">
+                <article class="team-card">
+                    <h2>Garv Gupta</h2>
+                    <p>ML Integration and IoT Server Connection</p>
+                </article>
+
+                <article class="team-card">
+                    <h2>Dhruv Kaushik</h2>
+                    <p>Web Development and  IoT Server Connection</p>
+                </article>
+
+                <article class="team-card">
+                    <h2>Dheraj Yadav</h2>
+                    <p>IoT Hardware & Embedded Systems Developer</p>
+                </article>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,49 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Crop Dashboard</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Irrigation System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='script.css') }}">
 </head>
 <body>
-  <div class="wrap">
-    <section class="card">
-      <h1>AI Driven Smart Crop Intelligence</h1>
-      <p class="muted">Receive soil sensor data, view live graphs, and get plant life-cycle predictions.</p>
-    </section>
+    <header class="site-header">
+        <nav class="navbar">
+            <a class="brand" href="{{ url_for('home') }}">Smart Irrigation</a>
+            <div class="nav-links">
+                <a href="{{ url_for('home') }}">Home</a>
+                <a href="{{ url_for('about') }}">About Us</a>
+                <a href="{{ url_for('login') }}">Login</a>
+            </div>
+        </nav>
+    </header>
 
-    <section class="card">
-      <h2>Planting Date</h2>
-      <form id="plantForm" class="form-row">
-        <div>
-          <label for="planting_date">Planting Date</label>
-          <input type="date" id="planting_date" name="planting_date" required />
-        </div>
-        <div>
-          <button type="submit">Save Date</button>
-        </div>
-      </form>
-      <p class="note" id="plantMsg"></p>
-    </section>
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <p class="eyebrow">IoT Based Farming</p>
+                <h1>Smart Irrigation System</h1>
+                <p id="hero-rotating-text">
+                    This website helps monitor soil moisture, temperature, and humidity
+                    using live Blynk data. Login to open the dashboard and view sensor readings.
+                </p>
+                <a class="primary-btn" href="{{ url_for('login') }}">Login to Dashboard</a>
+            </div>
+        </section>
 
-    <section class="card">
-      <h2>Live Status</h2>
-      <div class="metrics">
-        <div class="metric"><h3>Moisture</h3><p id="mVal">--</p></div>
-        <div class="metric"><h3>Temperature</h3><p id="tVal">--</p></div>
-        <div class="metric"><h3>Humidity</h3><p id="hVal">--</p></div>
-        <div class="metric"><h3>Current Stage</h3><p id="stageVal">--</p></div>
-      </div>
-    </section>
+        <section class="section">
+            <div class="section-content centered-content">
+                <p class="eyebrow">What We Solve</p>
+                <h2>Smarter Water Use, Better Plant Care</h2>
+                <p>
+                    In traditional irrigation, plants often receive too much water or not enough water.
+                    Our project monitors soil moisture, temperature, and humidity in real time, giving
+                    users clear data so irrigation decisions become easier and more accurate.
+                </p>
+            </div>
 
-    <section class="card">
-      <h2>Soil Moisture Graph</h2>
-      <canvas id="soilChart" height="95"></canvas>
-    </section>
-  </div>
+            <div class="feature-grid">
+                <article class="feature-card">
+                    <img src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=700&q=80" alt="Farm irrigation system">
+                    <div>
+                        <h2>Less Manual Checking</h2>
+                        <p>
+                            The user does not need to visit the field again and again to check soil conditions.
+                            Live dashboard values make plant conditions easier to understand.
+                        </p>
+                    </div>
+                </article>
 
-  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+                <article class="feature-card">
+                    <img src="https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=700&q=80" alt="Healthy plants in soil">
+                    <div>
+                        <h2>Protection From Overwatering</h2>
+                        <p>
+                            Too much water can damage roots, wash away soil nutrients, and waste water.
+                            Sensor data helps avoid unnecessary irrigation.
+                        </p>
+                    </div>
+                </article>
+
+                <article class="feature-card">
+                    <img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=700&q=80" alt="Plant growth closeup">
+                    <div>
+                        <h2>Better Plant Growth</h2>
+                        <p>
+                            When plants receive water at the right time and in the right conditions, growth
+                            improves. This project gives users a quick view of plant health.
+                        </p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="impact-section">
+            <div class="impact-content">
+                <div>
+                    <p class="eyebrow">Without This Project</p>
+                    <h2>What problems can happen without monitoring?</h2>
+                    <p>
+                        Without soil moisture and environmental data, irrigation depends on guesswork.
+                        This can increase water waste, plant stress, low crop quality, and manual effort.
+                    </p>
+                </div>
+
+                <ul class="impact-list">
+                    <li>Unnecessary water usage can increase</li>
+                    <li>Plants can become weak when soil stays dry</li>
+                    <li>Overwatering can damage plant roots</li>
+                    <li>Users do not get a live view of field conditions</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+    <script src="{{ url_for('static', filename='home.js') }}"></script>
 </body>
 </html>

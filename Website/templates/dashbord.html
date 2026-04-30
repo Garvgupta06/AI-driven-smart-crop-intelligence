@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Irrigation Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='script.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <nav class="navbar">
+            <a class="brand" href="{{ url_for('dashbord') }}">Smart Irrigation</a>
+            <div class="nav-links">
+                <a href="{{ url_for('home') }}">Home</a>
+                <a href="{{ url_for('about') }}">About Us</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="app-shell">
+        <aside class="sidebar">
+            <p class="sidebar-title">Dashboard</p>
+            <a class="sidebar-link active" href="{{ url_for('dashbord') }}">Data</a>
+            <a class="sidebar-link" href="{{ url_for('predict') }}">Prediction</a>
+        </aside>
+
+        <section class="dashboard-page">
+            <section class="dashboard-header">
+                <p class="eyebrow">Live Blynk Data</p>
+                <h1>Sensor Data</h1>
+                <p>Soil moisture, temperature, and humidity readings update automatically from Blynk.</p>
+            </section>
+
+            <section class="sensor-grid">
+                <article class="sensor-card">
+                    <span class="sensor-label">Soil Moisture</span>
+                    <strong><span id="soil">--</span></strong>
+                    <small>From sensor</small>
+                </article>
+
+                <article class="sensor-card">
+                    <span class="sensor-label">Temperature</span>
+                    <strong><span id="temp">--</span> °C</strong>
+                    <small>From sensor</small>
+                </article>
+
+                <article class="sensor-card">
+                    <span class="sensor-label">Humidity</span>
+                    <strong><span id="hum">--</span> %</strong>
+                    <small>From sensor</small>
+                </article>
+            </section>
+
+            <p id="status" class="status-text">Connecting to Blynk...</p>
+
+            <section class="prediction-result dashboard-prediction-card" id="dashboard-auto-prediction">
+                <p class="result-label">Auto Prediction</p>
+                <h2 id="auto-prediction-status">Waiting for sensor data</h2>
+                <p id="auto-prediction-probability">Updates automatically every 10 minutes.</p>
+                <p id="auto-prediction-note" class="status-text">Using saved crop settings or default values.</p>
+            </section>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

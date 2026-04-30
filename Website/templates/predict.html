@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Irrigation Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='script.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <nav class="navbar">
+            <a class="brand" href="{{ url_for('dashbord') }}">Smart Irrigation</a>
+            <div class="nav-links">
+                <a href="{{ url_for('dashbord') }}">Dashboard</a>
+                <a href="{{ url_for('home') }}">Home</a>
+                <a href="{{ url_for('about') }}">About Us</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="app-shell">
+        <aside class="sidebar">
+            <p class="sidebar-title">Dashboard</p>
+            <a class="sidebar-link" href="{{ url_for('dashbord') }}">Data</a>
+            <a class="sidebar-link active" href="{{ url_for('predict') }}">Prediction</a>
+        </aside>
+
+        <section class="prediction-page">
+            <section class="dashboard-header">
+                <p class="eyebrow">Machine Learning Model</p>
+                <h1>Irrigation Prediction</h1>
+                <p>Sensor values come from Blynk. Auto prediction updates every 10 minutes; the manual button is optional.</p>
+            </section>
+
+            <section class="sensor-grid sensor-grid-compact">
+                <article class="sensor-card">
+                    <span class="sensor-label">Soil Moisture</span>
+                    <strong><span id="soil">--</span></strong>
+                    <small>From sensor</small>
+                </article>
+
+                <article class="sensor-card">
+                    <span class="sensor-label">Temperature</span>
+                    <strong><span id="temp">--</span> °C</strong>
+                    <small>From sensor</small>
+                </article>
+
+                <article class="sensor-card">
+                    <span class="sensor-label">Humidity</span>
+                    <strong><span id="hum">--</span> %</strong>
+                    <small>From sensor</small>
+                </article>
+            </section>
+
+            <p id="status" class="status-text">Connecting to Blynk...</p>
+
+            <section class="prediction-layout">
+                <form action="{{ url_for('predict') }}" method="post" class="prediction-form">
+                    <input type="hidden" id="soil_moisture" name="soil_moisture" value="{{ form_values.get('soil_moisture', '35') }}">
+                    <input type="hidden" id="temperature" name="temperature" value="{{ form_values.get('temperature', '30') }}">
+                    <input type="hidden" id="humidity" name="humidity" value="{{ form_values.get('humidity', '55') }}">
+
+                    <div class="form-group">
+                        <label for="crop_type">Crop Type</label>
+                        <select id="crop_type" name="crop_type" required>
+                            {% for crop in crop_options %}
+                            <option value="{{ crop }}" {% if form_values.get('crop_type') == crop %}selected{% endif %}>{{ crop }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="season">Season</label>
+                        <select id="season" name="season" required>
+                            {% for season in season_options %}
+                            <option value="{{ season }}" {% if form_values.get('season') == season %}selected{% endif %}>{{ season }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="region">Region</label>
+                        <select id="region" name="region" required>
+                            {% for region in region_options %}
+                            <option value="{{ region }}" {% if form_values.get('region') == region %}selected{% endif %}>{{ region }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="crop_growth_stage">Crop Growth Stage</label>
+                        <select id="crop_growth_stage" name="crop_growth_stage" required>
+                            {% for stage in growth_stage_options %}
+                            <option value="{{ stage }}" {% if form_values.get('crop_growth_stage') == stage %}selected{% endif %}>{{ stage }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="days_since_rain">Days Since Rain</label>
+                        <input type="number" id="days_since_rain" name="days_since_rain" min="0" max="60" step="1" value="{{ form_values.get('days_since_rain', '5') }}" required>
+                        <small>This value increases automatically each day after you save/predict.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="field_area">Field Area (hectare)</label>
+                        <input type="number" id="field_area" name="field_area" min="0.1" step="0.1" value="{{ form_values.get('field_area', '2') }}" required>
+                    </div>
+
+                    <button type="submit">Predict Irrigation</button>
+                </form>
+
+                <aside class="prediction-result" id="prediction-result-panel">
+                    {% if error %}
+                    <div class="error-message">{{ error }}</div>
+                    {% elif result %}
+                    <p class="result-label">Model Answer</p>
+                    <h2 id="auto-prediction-status" class="prediction-status {% if result.prediction == 'IRRIGATION NEEDED' %}status-needed{% else %}status-not-needed{% endif %}">
+                        {{ result.prediction }}
+                    </h2>
+                    <p id="auto-prediction-probability">Irrigation probability: <strong>{{ result.irrigation_probability }}%</strong></p>
+
+                    <div class="risk-grid" id="auto-risk-grid">
+                        {% for key, value in result.risk_analysis.items() %}
+                        <div>
+                            <span>{{ key.replace('_', ' ').title() }}</span>
+                            <strong>{{ value }}</strong>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="result-label">Model Answer</p>
+                    <h2 id="auto-prediction-status">Waiting for Auto Prediction</h2>
+                    <p id="auto-prediction-probability">Auto prediction runs after sensor data loads, then every 10 minutes.</p>
+                    <div class="risk-grid" id="auto-risk-grid"></div>
+                    {% endif %}
+                    <p id="auto-prediction-note" class="status-text">Manual prediction button is still available.</p>
+                </aside>
+            </section>
+
+            <section class="condition-guide">
+                <div class="dashboard-header">
+                    <p class="eyebrow">User Help</p>
+                    <h2>Condition Guide</h2>
+                    <p>
+                        This section is only for understanding irrigation conditions. It does not change
+                        the model prediction or sensor data.
+                    </p>
+                </div>
+
+                <div class="condition-layout">
+                    <div class="condition-form">
+                        <div class="form-group">
+                            <label for="guide_soil">Soil Moisture (%)</label>
+                            <input type="number" id="guide_soil" min="0" max="100" step="1" value="35">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="guide_temp">Temperature (°C)</label>
+                            <input type="number" id="guide_temp" min="-10" max="60" step="1" value="30">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="guide_humidity">Humidity (%)</label>
+                            <input type="number" id="guide_humidity" min="0" max="100" step="1" value="55">
+                        </div>
+
+                        <button type="button" id="condition-check-btn">Check Condition</button>
+                    </div>
+
+                    <aside class="condition-result">
+                        <p class="result-label">Guide Result</p>
+                        <h2 id="condition-guide-status">Set values to check</h2>
+                        <ul id="condition-guide-list" class="condition-list">
+                            <li>Soil moisture below 40% usually means the soil is dry.</li>
+                            <li>High temperature with low humidity increases water demand.</li>
+                            <li>Good moisture and moderate temperature can reduce irrigation need.</li>
+                        </ul>
+                    </aside>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
