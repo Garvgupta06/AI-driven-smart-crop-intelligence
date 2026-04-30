@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Irrigation System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='script.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <nav class="navbar">
+            <a class="brand" href="{{ url_for('home') }}">Smart Irrigation</a>
+            <div class="nav-links">
+                <a href="{{ url_for('home') }}">Home</a>
+                <a href="{{ url_for('about') }}">About Us</a>
+                <a href="{{ url_for('login') }}">Login</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <p class="eyebrow">AI Crop Intelligence</p>
+                <h1>Smart Irrigation System</h1>
+                <p id="hero-rotating-text">
+                    Monitor soil moisture, temperature, and humidity, then use the trained model to decide when irrigation is needed.
+                </p>
+                <a class="primary-btn" href="{{ url_for('login') }}">Open Dashboard</a>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-content centered-content">
+                <p class="eyebrow">Project Features</p>
+                <h2>Crop monitoring made simple</h2>
+                <p>
+                    The dashboard connects live sensor readings with irrigation prediction so the user can act quickly and save water.
+                </p>
+            </div>
+
+            <div class="feature-grid">
+                <article class="feature-card">
+                    <img src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=900&q=80" alt="Irrigated crop field">
+                    <div>
+                        <h2>Live Sensors</h2>
+                        <p>View soil moisture, temperature, and humidity values from the field dashboard.</p>
+                    </div>
+                </article>
+
+                <article class="feature-card">
+                    <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=900&q=80" alt="Green farm rows">
+                    <div>
+                        <h2>ML Prediction</h2>
+                        <p>Use crop, season, region, and weather conditions to predict irrigation need.</p>
+                    </div>
+                </article>
+
+                <article class="feature-card">
+                    <img src="https://images.unsplash.com/photo-1495107334309-fcf20504a5ab?auto=format&fit=crop&w=900&q=80" alt="Healthy agricultural field">
+                    <div>
+                        <h2>Water Saving</h2>
+                        <p>Support timely irrigation decisions without wasting water on already healthy soil.</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="impact-section">
+            <div class="impact-content">
+                <div>
+                    <p class="eyebrow">System Flow</p>
+                    <h2>Sensor data becomes a decision</h2>
+                    <p>
+                        ESP32 sensor readings are displayed on the dashboard and passed into the optimized irrigation model for clear guidance.
+                    </p>
+                </div>
+                <ul class="impact-list">
+                    <li>Secure dashboard login</li>
+                    <li>Real-time Blynk data fetch</li>
+                    <li>Automatic and manual prediction</li>
+                    <li>Risk analysis for crop conditions</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='home.js') }}"></script>
+</body>
+</html>

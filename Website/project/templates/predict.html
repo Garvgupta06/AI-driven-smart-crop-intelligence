@@ -112,30 +112,14 @@
                 </form>
 
                 <aside class="prediction-result" id="prediction-result-panel">
-                    {% if error %}
-                    <div class="error-message">{{ error }}</div>
-                    {% elif result %}
-                    <p class="result-label">Model Answer</p>
-                    <h2 id="auto-prediction-status" class="prediction-status {% if result.prediction == 'IRRIGATION NEEDED' %}status-needed{% else %}status-not-needed{% endif %}">
-                        {{ result.prediction }}
-                    </h2>
-                    <p id="auto-prediction-probability">Irrigation probability: <strong>{{ result.irrigation_probability }}%</strong></p>
-
-                    <div class="risk-grid" id="auto-risk-grid">
-                        {% for key, value in result.risk_analysis.items() %}
-                        <div>
-                            <span>{{ key.replace('_', ' ').title() }}</span>
-                            <strong>{{ value }}</strong>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <p class="result-label">Model Answer</p>
-                    <h2 id="auto-prediction-status">Waiting for Auto Prediction</h2>
-                    <p id="auto-prediction-probability">Auto prediction runs after sensor data loads, then every 10 minutes.</p>
-                    <div class="risk-grid" id="auto-risk-grid"></div>
+                    {% if alert_message %}
+                    <div class="error-message">{{ alert_message }}</div>
                     {% endif %}
-                    <p id="auto-prediction-note" class="status-text">Manual prediction button is still available.</p>
+                    {% if prediction_result %}
+                    <div class="prediction-output">
+                        <h2>Prediction: {{ prediction_result }}</h2>
+                    </div>
+                    {% endif %}
                 </aside>
             </section>
 
