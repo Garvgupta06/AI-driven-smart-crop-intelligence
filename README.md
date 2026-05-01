@@ -1,170 +1,103 @@
-# AI-driven-smart-crop-intelligence
+# Smart Irrigation — Pipeline Overview
 
-## Overview
+This repository implements an end-to-end smart-irrigation pipeline: ESP32 field sensors → Flask web dashboard → ML pipeline (feature engineering → selection → scaler → model) → prediction results shown to the user. The README below explains the production inference pipeline used by the web app, the training artefacts, and how to run and debug the system locally.
 
-AI-powered smart agriculture system combining IoT sensors, machine learning models, and web dashboard for intelligent crop monitoring and irrigation prediction. The system integrates ESP32-based hardware with advanced ML algorithms to provide real-time agricultural insights and automated irrigation control.
+**Key goals:** reliable irrigation suggestions from live sensor data, transparent feature pipeline, and a small, reproducible inference surface used by the Flask app.
 
-## Project Objectives
+**Note:** Do not store secrets (API tokens) in source code. Set them via environment variables or a config file in production.
 
-- Detect soil moisture levels with precision monitoring
-- Monitor temperature and humidity for environmental tracking
-- Toggle automatic irrigation with manual override capabilities
-- Live web dashboard with interactive graphs and data visualization
-- Manual control and automation control for flexible farm management
-- AI-driven irrigation decision support with 81.5% prediction accuracy
+**Relevant paths** (workspace root):
+- `Website/project/app.py` — Flask application (serves UI, `/data` and `/predict`).
+- `Website/project/test_pipeline.py` — small script to validate pipeline artifacts locally.
+- `Website/project/templates/` and `Website/project/static/` — frontend templates and JS/CSS.
+- `model/` — saved model artifacts and notebook (`irrigation_model_optimized.ipynb`).
 
-## Current Status
+**Primary model artifacts in `model/`:**
+- `irrigation_model_optimized.pkl` — trained RandomForest model used in production.
+- `irrigation_scaler_optimized.pkl` — StandardScaler fitted on the final (selected) features.
+- `irrigation_crop_encoder_optimized.pkl` — OneHotEncoder for crop types.
+- `irrigation_season_encoder_optimized.pkl` — encoder for seasons.
+- `irrigation_region_encoder_optimized.pkl` — encoder for regions.
+- `irrigation_feature_names_optimized.pkl` — ordered list of the selected (top-20) features used for inference.
 
-Version 0.2 completed with optimized ML model achieving 81.5% accuracy, representing an 11.5 percentage point improvement over baseline models. Hardware integration with ESP32-based sensor network and Flask web dashboard is in progress. Next phase focuses on production deployment and enhanced automation features.
+## Training vs Inference (short)
+- Training pipeline (in `model/irrigation_model_optimized.ipynb`) builds ~37 engineered features (stress indicators, interactions, polynomial terms and domain-mapped features), then uses `SelectKBest` to pick the top 20 features. The scaler is fitted on those selected 20 features and the RandomForest model trained on the scaled selection.
+- Inference (production) must use the exact same feature calculations and the same 20 feature ordering saved in `irrigation_feature_names_optimized.pkl`. The Flask app reconstructs engineered features, fills a dictionary of candidate features, then builds an input vector using only these saved top-20 names, scales that vector with the saved scaler, and calls `model.predict()`.
 
-### What is included in v0.2
-- Advanced ESP32-based smart crop monitoring with optimized sensors
-- Enhanced soil moisture, temperature, and humidity data collection
-- Improved rain and light sensing integration with better accuracy
-- Robust Flask web dashboard with real-time monitoring capabilities
-- Optimized irrigation prediction model with 81.5% accuracy
-- Advanced feature engineering with 27 engineered features
+## Inference pipeline (what `app.py` does)
+1. Read sensor and form values (soil moisture, temperature, humidity, crop, season, region, growth stage, days since rain, field area).
+2. Compute engineered numeric features exactly as in training (examples include `heat_stress`, `moisture_stress`, `et_factor`, `water_deficit`, `temp_squared`, `growth_stage_need`, etc.).
+3. Use saved encoders to transform categorical variables (crop one-hot expansion, season/region encoding) using the same naming convention the training notebook used.
+4. Build an ordered vector using `irrigation_feature_names_optimized.pkl` (the saved top-20 list).
+5. Scale the vector with `irrigation_scaler_optimized.pkl`.
+6. Call `irrigation_model_optimized.pkl`'s `predict()` (and optionally `predict_proba()` for confidence).
 
-## Model
+Important: Do not run feature-selection (`SelectKBest`) at inference time — the model expects exactly the selected 20 features in the same order that the scaler and model were trained on. The repository's `app.py` has been updated to follow this rule.
 
-### Model v0.1
+## Web app flow
+- Frontend (`static/script.js`) polls `/data` every few seconds to get sensor pins from Blynk (via backend `/data`).
+- The prediction page contains hidden inputs that are updated from live sensor values; when the user submits `/predict` the server computes the engineered features and runs inference.
+- API endpoints in `app.py` to note:
+    - `GET /` and `GET /home` — homepage
+    - `GET /dashbord` — dashboard (requires login)
+    - `GET|POST /predict` — manual prediction page and form handler
+    - `GET /data` — returns latest Blynk values (V0,V1,V2)
 
-Binary classification model to predict whether irrigation is needed based on IoT sensor data and manual inputs. Baseline implementation using standard machine learning approaches.
+## Hardware & Sensors
+This project integrates an ESP32-based field node and a small set of common agricultural sensors and actuators. The list below describes what was used during development and practical notes for integration.
 
-**Dataset:** `irrigation_prediction.csv`
+- Microcontroller: **ESP32** (Wi-Fi enabled, low-power MCU)
+- Sensors:
+    - **Soil moisture sensor (capacitive)** — measures volumetric water content; preferred over resistive probes for longevity.
+    - **Temperature + Humidity sensor (DHT11 / DHT22)** — environmental readings used to compute stress features.
+    - **Rain sensor** — used to estimate recent rainfall for `days_since_rain` and rain-based logic.
+    - **Light sensor (LDR)** — optional, used for daylight-aware automation.
+    - **Optional:** flow sensors / pressure sensors can be added for advanced irrigation telemetry.
+- Actuators & power:
+    - **Relay modules** or **MOSFET/transistor drivers** to switch pumps or solenoid valves safely.
+    - **Solenoid valve / water pump** — actual irrigation actuator connected through a relay or driver.
+    - **Power:** 5V logic supply for sensors and ESP32; 12V (or appropriate) supply for pumps/valves with proper regulation.
 
-**Target Variable:**
-- 0 = No Irrigation Needed (Low demand)
-- 1 = Irrigation Needed (Medium/High demand)
+Integration notes:
+- Use the ESP32 ADC carefully: add proper voltage dividers and calibration for analog soil sensors and avoid driving sensors above 3.3V.
+- Use opto-isolation or driver circuits for relays and include flyback diodes across inductive loads (valves, pumps).
+- Place sensors where they represent field conditions (soil probe depth, shaded vs exposed areas) and consider multiple probes if the field is heterogeneous.
+- Debounce and low-pass filter fast-changing sensor readings on the device or backend before passing values to the ML pipeline.
 
-**Features Used:**
+These hardware choices align with the features engineered in the model notebook (soil moisture, temperature, humidity, and derived stress/interaction features). If you want, I can add a wiring diagram and a minimal ESP32 sketch to stream data to Blynk or the Flask backend.
 
-| Type | Features |
-|------|----------|
-| Sensor Inputs | Humidity, Soil_Moisture, Temperature_C |
-| Manual Inputs | Crop_Type, Season, Region |
-| Engineered | temp_humidity, temp_moisture |
-
-**Encoding:**
-
-- Crop_Type: One-Hot Encoded (Wheat, Rice, Cotton, Maize, Sugarcane, Potato)
-- Season: Label Encoded (Kharif: 0, Rabi: 1, Zaid: 2)
-- Region: Label Encoded (Central: 0, East: 1, North: 2, South: 3, West: 4)
-
-**Model Accuracies:**
-| Model | Accuracy |
-|-------|----------|
-| Random Forest Classifier | ~70% |
-| XGBoost Classifier | ~70% |
-
-**PKL Files Generated:**
-| File | Description |
-|------|-------------|
-| `irrigation_model.pkl` | Trained Random Forest model |
-| `irrigation_feature_names.pkl` | List of feature column names in training order |
-| `irrigation_crop_encoder.pkl` | OneHotEncoder for Crop_Type |
-| `irrigation_season_encoder.pkl` | LabelEncoder for Season |
-| `irrigation_region_encoder.pkl` | LabelEncoder for Region |
-
-**Prediction Function:**
-```python
-predict_irrigation(humidity, soil_moisture, temperature, crop_type, season, region)
-# Returns: (prediction, probability)
-# prediction: 0 or 1
-# probability: confidence score (0.0 - 1.0)
+## How to run locally
+1. Create and activate a virtual environment (Windows example):
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 ```
-
-### Model v0.2
-
-Advanced optimization achieving 81.5% accuracy through sophisticated feature engineering and model refinement. Enhanced prediction capabilities with detailed risk analysis and improved confidence scoring.
-
-**Key Improvements:**
-- **Accuracy:** 81.5% (11.5 percentage point improvement over v0.1)
-- **Cross-validation:** 83.5% ± 1.88% mean accuracy across 5-fold validation
-- **Feature Engineering:** 27 advanced features including stress indicators, interaction terms, and polynomial features
-- **Domain Knowledge:** Agricultural expertise integrated into feature design
-- **Risk Analysis:** Comprehensive output including temperature stress, moisture stress, and crop-specific factors
-
-**Advanced Features:**
-
-| Type | Features |
-|------|----------|
-| Stress Indicators | heat_stress, cold_stress, moisture_stress, humidity_stress |
-| Interaction Features | et_factor, water_deficit, irrigation_urgency, total_stress |
-| Polynomial Features | temp_squared, moisture_squared, temp_moisture_interaction |
-| Domain-Specific | crop_water_req, seasonal_water_need, regional_stress, growth_stage_water |
-| Optimal Conditions | optimal_temp, optimal_moisture, comfort_score |
-
-**Optimized PKL Files:**
-| File | Description |
-|------|-------------|
-| `irrigation_model_optimized.pkl` | Optimized Random Forest model |
-| `irrigation_scaler_optimized.pkl` | StandardScaler for feature normalization |
-| `irrigation_selector_optimized.pkl` | SelectKBest for feature selection (20 features) |
-| `irrigation_crop_encoder_optimized.pkl` | OneHotEncoder for Crop_Type |
-| `irrigation_season_encoder_optimized.pkl` | LabelEncoder for Season |
-| `irrigation_region_encoder_optimized.pkl` | LabelEncoder for Region |
-| `irrigation_feature_names_optimized.pkl` | Selected feature names list |
-
-**Enhanced Prediction Function:**
-```python
-predict_irrigation_optimized(humidity, soil_moisture, temperature, crop_type, season, region,
-                           crop_growth_stage, days_since_rain, field_area)
-# Returns: (prediction, confidence, risk_analysis)
-# prediction: int (0=No irrigation, 1=Irrigation needed)
-# confidence: float (0.0-1.0 probability score)
-# risk_analysis: dict with detailed risk factors and agricultural insights
+2. Install dependencies:
+```powershell
+pip install -r requirement.txt
 ```
+3. (Optional) Test pipeline artifacts without running server:
+```powershell
+python Website/project/test_pipeline.py
+```
+This script prints feature names, attempts a Blynk fetch (if token present in `app.py`), and runs a couple of sample cases through the saved scaler + model to validate shapes.
+4. Run the Flask app (from `Website/project`):
+```powershell
+python app.py
+```
+Then open `http://localhost:5000/`.
 
-**Performance Metrics:**
-- **Training Accuracy:** 81.5%
-- **Cross-validation Mean:** 83.5% ± 1.88%
-- **Feature Selection:** 20 most important features from 37 engineered features
-- **Model Type:** Optimized Random Forest with hyperparameter tuning
-- **Data Balancing:** SMOTE technique for handling class imbalance
+## Troubleshooting — common issues
+- Soil shows `0` in the UI and predictions are unexpected:
+    - Check Blynk fetch: confirm token is configured securely (do not commit it). If the backend cannot reach Blynk it should not silently return a 0; inspect logs from `fetch_blynk_data()` and update token.
+    - Confirm `irrigation_feature_names_optimized.pkl` is present and up-to-date. Mismatched feature ordering causes incorrect model inputs.
+- Prediction returns 500 Internal Server Error:
+    - Look at the Flask server console for the Python traceback. Common causes: missing model files, wrong feature names, or None values where floats expected. The repo includes `test_pipeline.py` to reproduce these problems locally.
+- Frontend auto-prediction fails:
+    - `static/script.js` attempts JSON auto-prediction endpoints (`/predict-json` or `/auto-predict`) but these are not implemented by default. Manual `/predict` (form POST) is implemented and recommended for testing.
 
-## Website
+## Development notes & next steps
+- Replace hard-coded tokens with environment variables or a small config loader.
+- Add a JSON auto-predict endpoint that returns model probability and risk analysis for the frontend UI.
+- Add unit tests that exercise the feature engineering functions and ensure the `input_vector` built in `app.py` matches `irrigation_feature_names_optimized.pkl` ordering.
 
-Flask-based web dashboard providing real-time sensor monitoring, data visualization, and crop lifecycle tracking with RESTful API endpoints for device integration.
-
-### Flask Workflow
-1. ESP32 collects sensor values (soil moisture, temperature, humidity, rain, light).
-2. Device sends data to Flask backend API endpoints.
-3. Flask validates and processes incoming payloads.
-4. Processed data is stored in MongoDB for history and analysis.
-5. Frontend dashboard requests latest and historical data from Flask APIs.
-6. Dashboard updates charts and status cards in near real-time.
-7. User actions (manual motor ON/OFF or mode switch) are sent to Flask.
-8. Flask forwards control decisions to the irrigation logic/device layer.
-
-### Flask App Structure (v0.2)
-- `Website/app.py`: main Flask application entry point
-- `Website/templates/index.html`: dashboard template
-- `Website/static/js/dashboard.js`: frontend API calls and chart updates
-- `Website/static/css/style.css`: dashboard styling
-
-## Hardware Requirements
-
-### Microcontroller:
-- ESP32
-
-### Sensors:
-- Soil moisture sensor
-- DHT11 or DHT22
-- LDR
-- Rain Sensor
-- 5V Adapter
-- 12V Adapter
-- Voltage Regulator
-
-## Software Requirements:
-- Core framework
-- Flask
-- Flask-CORS
-- Flask-RESTful
-- Flask-JWT-Extended
-- Werkzeug
-- MongoDB
-
-## Design Link
-- https://www.tinkercad.com/things/fhN11jeuz2I/editel?returnTo=%2Fdashboard&sharecode=qL12FBooymbpJ4HXtfxJrVG13U5Xz-ItZWC-hXHdLmU
